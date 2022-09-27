@@ -31,6 +31,7 @@ func ListInfluencers(c echo.Context) error {
 
 	// handling limit, by default 6
 	var limit int64
+	var page int64
 	if c.QueryParam("limit") != "" {
 		i, err := strconv.ParseInt(c.QueryParam("limit"), 10, 64)
 		if err != nil {
@@ -41,7 +42,18 @@ func ListInfluencers(c echo.Context) error {
 		limit = int64(6)
 	}
 
-	optsListData := options.Find().SetLimit(limit)
+	// handling page, by default 1
+	if c.QueryParam("page") != "" {
+		i, err := strconv.ParseInt(c.QueryParam("page"), 10, 64)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.InfluencerResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+		}
+		page = (i - 1) * limit
+	} else {
+		page = int64(0)
+	}
+
+	optsListData := options.Find().SetLimit(limit).SetSkip(page)
 
 	// handling filter by search keyword [DONE]
 	if c.QueryParam("search") != "" {
