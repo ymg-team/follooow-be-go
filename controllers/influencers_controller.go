@@ -13,6 +13,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,6 +21,7 @@ import (
 var influencersCollection *mongo.Collection = configs.GetCollection(configs.DB, "influencers")
 var validate = validator.New()
 
+// controller of GET /influencers
 func ListInfluencers(c echo.Context) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -99,4 +101,71 @@ func ListInfluencers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, responses.InfluencerResponse{Status: http.StatusOK, Message: "success", Data: &echo.Map{"influencers": influencers, "total": count}})
+}
+
+// controller of GET /influencers/:id
+func DetailInfluencers(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	// get influencer_id
+	influencerId := c.Param("influencer_id")
+	var influencer models.InfluencerModel
+
+	objId, _ := primitive.ObjectIDFromHex(influencerId)
+
+	err := influencersCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&influencer)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InfluencerResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	return c.JSON(http.StatusOK, responses.InfluencerResponse{Status: http.StatusOK, Message: "ok", Data: &echo.Map{"influencer": influencer}})
+}
+
+// controller of GET /influencers/quick-find
+func QuickFindInfluencers(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var influencers []models.InfluencerSmallDataModel
+
+	// max result is 20
+	optsListData := options.Find().SetLimit(20)
+
+	// filter generator
+	filterListData := bson.D{}
+
+	if c.QueryParam("ids") != "" {
+		idsArr := strings.Split(c.QueryParam("ids"), ",")
+		var idsObjId []primitive.ObjectID
+
+		// normalize ids
+		for key := range idsArr {
+			objId, _ := primitive.ObjectIDFromHex(idsArr[key])
+
+			idsObjId = append(idsObjId, objId)
+		}
+
+		filterListData = bson.D{{"_id", bson.M{"$in": idsObjId}}}
+	}
+
+	// get data from database
+	results, err := influencersCollection.Find(ctx, filterListData, optsListData)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InfluencerResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	// normalize db results
+	for results.Next(ctx) {
+		var singleInfluencer models.InfluencerSmallDataModel
+		if err = results.Decode(&singleInfluencer); err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.InfluencerResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+		}
+
+		influencers = append(influencers, singleInfluencer)
+	}
+
+	return c.JSON(http.StatusOK, responses.InfluencerResponse{Status: http.StatusOK, Message: "success", Data: &echo.Map{"influencers": influencers}})
+
 }

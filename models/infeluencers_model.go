@@ -17,6 +17,12 @@ type InfluencerModel struct {
 	Label       []string           `json:"label,omitempty"`
 }
 
+type InfluencerSmallDataModel struct {
+	Id     primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty" validate:"required"`
+	Name   string             `json:"name,omitempty" validate:"required"`
+	Avatar string             `json:"avatar,omitempty"`
+}
+
 type influencerSocial struct {
 	Link string `json:"link,omitempty"`
 	Type string `json:"type,omitempty"`
