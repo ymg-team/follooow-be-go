@@ -119,7 +119,14 @@ func DetailInfluencers(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, responses.InfluencerResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
 	}
 
-	return c.JSON(http.StatusOK, responses.InfluencerResponse{Status: http.StatusOK, Message: "ok", Data: &echo.Map{"influencer": influencer}})
+	// update visits + 1
+	_, err = influencersCollection.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"visits", influencer.Visits + 1}}}})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InfluencerResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	return c.JSON(http.StatusOK, responses.InfluencerResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"influencer": influencer}})
 }
 
 // controller of GET /influencers/quick-find
