@@ -68,7 +68,7 @@ func ListInfluencers(c echo.Context) error {
 	}
 
 	// handling filter by label [DONE]
-	if c.QueryParam("gender") != "" {
+	if c.QueryParam("gender") == "f" || c.QueryParam("gender") == "m" {
 		filterListData["gender"] = strings.ToLower(c.QueryParam("gender"))
 	}
 
