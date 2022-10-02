@@ -29,7 +29,7 @@ func ListInfluencers(c echo.Context) error {
 
 	var influencers []models.InfluencerModel
 
-	filterListData := bson.D{}
+	filterListData := bson.M{}
 
 	// handling limit, by default 6
 	var limit int64
@@ -59,12 +59,17 @@ func ListInfluencers(c echo.Context) error {
 
 	// handling filter by search keyword [DONE]
 	if c.QueryParam("search") != "" {
-		filterListData = bson.D{{"name", bson.M{"$regex": c.QueryParam("search"), "$options": "i"}}}
+		filterListData["name"] = bson.M{"$regex": c.QueryParam("search"), "$options": "i"}
 	}
 
 	// handling filter by label [DONE]
 	if c.QueryParam("label") != "" {
-		filterListData = bson.D{{"label", bson.M{"$in": strings.Split(c.QueryParam("label"), ",")}}}
+		filterListData["label"] = bson.M{"$in": strings.Split(c.QueryParam("label"), ",")}
+	}
+
+	// handling filter by label [DONE]
+	if c.QueryParam("gender") != "" {
+		filterListData["gender"] = strings.ToLower(c.QueryParam("gender"))
 	}
 
 	// handling filter by gender
