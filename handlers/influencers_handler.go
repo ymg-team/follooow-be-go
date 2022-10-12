@@ -195,6 +195,7 @@ func AddInfluencer(c echo.Context) error {
 		new_data := bson.D{
 			{"name", payload["name"]},
 			{"bio", payload["bio"]},
+			{"code", payload["code"]},
 			{"avatar", payload["avatar"]},
 			{"updated_on", time.Now().UnixNano() / int64(time.Millisecond)},
 			{"nationality", payload["nationality"]},
@@ -243,6 +244,7 @@ func UpdateInfluencer(c echo.Context) error {
 		new_data := bson.D{
 			{"name", payload["name"]},
 			{"bio", payload["bio"]},
+			{"code", payload["code"]},
 			{"avatar", payload["avatar"]},
 			{"updated_on", time.Now().UnixNano() / int64(time.Millisecond)},
 			{"nationality", payload["nationality"]},
