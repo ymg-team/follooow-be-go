@@ -202,7 +202,7 @@ func AddInfluencer(c echo.Context) error {
 			{"gender", payload["gender"]},
 			{"socials", payload["socials"]},
 			{"label", payload["label"]},
-			{"views", 1}}
+			{"visits", 1}}
 
 		_, err := influencersCollection.InsertOne(ctx, new_data)
 
