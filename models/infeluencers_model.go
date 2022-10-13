@@ -16,7 +16,7 @@ type InfluencerModel struct {
 	Socials     []influencerSocial `json:"socials,omitempty"`
 	Label       []string           `json:"label,omitempty"`
 	Views       int                `json:"views,omitempty"`
-	Code        int                `json:"code,omitempty"`
+	Code        string             `json:"code,omitempty"`
 }
 
 type InsertInfluencerModel struct {
@@ -30,7 +30,7 @@ type InsertInfluencerModel struct {
 	Socials     []influencerSocial `json:"socials,omitempty"`
 	Label       []string           `json:"label,omitempty"`
 	Views       int                `json:"views,omitempty"`
-	Code        int                `json:"code,omitempty"`
+	Code        string             `json:"code,omitempty"`
 }
 
 type InfluencerSmallDataModel struct {
