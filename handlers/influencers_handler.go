@@ -69,7 +69,7 @@ func ListInfluencers(c echo.Context) error {
 	}
 
 	// handling filter by label [DONE]
-	if c.QueryParam("gender") == "f" || c.QueryParam("gender") == "m" {
+	if c.QueryParam("gender") != "" {
 		filterListData["gender"] = bson.M{"$regex": strings.ToLower(c.QueryParam("gender")), "$options": "i"}
 	}
 
