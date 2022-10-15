@@ -70,7 +70,10 @@ func ListInfluencers(c echo.Context) error {
 
 	// handling filter by label [DONE]
 	if c.QueryParam("gender") != "" {
-		filterListData["gender"] = bson.M{"$regex": strings.ToLower(c.QueryParam("gender")), "$options": "i"}
+		gender := strings.ToLower(c.QueryParam("gender"))
+		if gender == "f" || gender == "m" {
+			filterListData["gender"] = gender
+		}
 	}
 
 	// handling filter by gender
@@ -106,7 +109,12 @@ func ListInfluencers(c echo.Context) error {
 		influencers = append(influencers, singleInfluencer)
 	}
 
-	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "success", Data: &echo.Map{"influencers": influencers, "total": count}})
+	// check is no data available
+	if len(influencers) < 1 {
+		return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusNoContent, Message: "Influencers not available", Data: &echo.Map{"influencers": influencers, "total": count}})
+	} else {
+		return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "success", Data: &echo.Map{"influencers": influencers, "total": count}})
+	}
 }
 
 // handler of GET /influencers/:id
