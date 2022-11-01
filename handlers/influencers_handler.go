@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,7 +19,8 @@ import (
 )
 
 var influencersCollection *mongo.Collection = configs.GetCollection(configs.DB, "influencers")
-var validate = validator.New()
+
+// var validate = validator.New()
 
 // handler of GET /influencers
 func ListInfluencers(c echo.Context) error {
