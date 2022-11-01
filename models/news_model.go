@@ -7,6 +7,7 @@ import (
 type NewsModel struct {
 	Id              primitive.ObjectID         `json:"id,omitempty" bson:"_id,omitempty" validate:"required"`
 	Title           string                     `json:"title,omitempty" validate:"required"`
+	Thumbnail       string                     `json:"thumbnail,omitempty" validate:"required"`
 	Content         string                     `json:"content,omitempty" validate:"required"`
 	Views           int                        `json:"views,omitempty" validate:"required"`
 	CreatedOn       int                        `json:"created_on,omitempty" bson:"created_on,omitempty" validate:"required"`
