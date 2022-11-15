@@ -8,6 +8,7 @@ import (
 	"follooow-be/responses"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -60,6 +61,12 @@ func ListNews(c echo.Context) error {
 	// handling filter by search keyword [DONE]
 	if c.QueryParam("search") != "" {
 		filterListData["title"] = bson.M{"$regex": c.QueryParam("search"), "$options": "i"}
+	}
+
+	// handling filter by influencer id keyword [DONE]
+	if c.QueryParam("influencer_ids") != "" {
+		idsArr := strings.Split(c.QueryParam("influencer_ids"), ",")
+		filterListData["influencers"] = bson.M{"$in": idsArr}
 	}
 
 	// by default sortby last update [DONE]
