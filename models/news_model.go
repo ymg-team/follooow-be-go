@@ -16,3 +16,11 @@ type NewsModel struct {
 	Influencers     []string                   `json:"influencers,omitempty"`
 	InfluencersData []InfluencerSmallDataModel `json:"influencers_data,omitempty"`
 }
+
+type PayloadNews struct {
+	Title       string   `json:"title,omitempty"`
+	Content     string   `json:"content,omitempty"`
+	Thumbnail   string   `json:"thumbnail,omitempty"`
+	Influencers []string `json:"influencers,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+}

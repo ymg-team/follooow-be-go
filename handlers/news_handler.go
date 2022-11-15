@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"follooow-be/configs"
 	"follooow-be/models"
 	"follooow-be/responses"
@@ -20,7 +21,7 @@ var newsCollection *mongo.Collection = configs.GetCollection(configs.DB, "news")
 
 // var validate = validator.New()
 
-// handler of GET /news
+// handle of GET /news
 func ListNews(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -205,5 +206,113 @@ func DetailNews(c echo.Context) error {
 	// end of get all influencers on post
 
 	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"news": news}})
+}
 
+// handle of POST /news
+func CreateNews(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// var payload models.PayloadNews
+	var payload models.PayloadNews
+	err := json.NewDecoder(c.Request().Body).Decode(&payload)
+	now := time.Now().UnixNano() / int64(time.Millisecond)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
+	} else {
+		new_data := bson.D{
+			{"title", payload.Title},
+			{"views", 1},
+			{"updated_on", now},
+			{"created_on", now},
+			{"thumbnail", payload.Thumbnail},
+			{"content", payload.Content},
+			{"tags", payload.Tags},
+			{"influencers", payload.Influencers},
+			{"lang", "EN"},
+		}
+
+		_, err := newsCollection.InsertOne(ctx, new_data)
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error insert data", Data: nil})
+		} else {
+
+			var idsObjId []primitive.ObjectID
+
+			// normalize ids
+			influencers := payload.Influencers
+			for key := range influencers {
+				objId, _ := primitive.ObjectIDFromHex(influencers[key])
+
+				idsObjId = append(idsObjId, objId)
+			}
+
+			_, err = influencersCollection.UpdateMany(ctx, bson.D{{"_id", bson.M{"$in": idsObjId}}}, bson.D{{"$set", bson.D{{"updated_on", now}}}})
+
+			return c.JSON(http.StatusCreated, responses.GlobalResponse{Status: http.StatusCreated, Message: "Success create news", Data: nil})
+		}
+	}
+}
+
+// handle of POST /news/:id
+func UpdateNews(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// get news id
+	newsId := c.Param("news_id")
+	var news models.NewsModel
+
+	objId, _ := primitive.ObjectIDFromHex(newsId)
+
+	// check is data available in db
+	errFind := newsCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&news)
+
+	if errFind != nil {
+		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "Error", Data: nil})
+	}
+
+	// var payload models.PayloadNews
+	var payload models.PayloadNews
+	err := json.NewDecoder(c.Request().Body).Decode(&payload)
+	now := time.Now().UnixNano() / int64(time.Millisecond)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
+	} else {
+		new_data := bson.D{
+			{"title", payload.Title},
+			{"updated_on", now},
+			{"thumbnail", payload.Thumbnail},
+			{"content", payload.Content},
+			{"tags", payload.Tags},
+			{"influencers", payload.Influencers},
+		}
+
+		filter := bson.D{{"_id", objId}}
+		update := bson.D{{"$set", new_data}}
+
+		_, err := newsCollection.UpdateOne(context.TODO(), filter, update)
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error update news", Data: nil})
+		} else {
+
+			var idsObjId []primitive.ObjectID
+
+			// normalize ids
+			influencers := payload.Influencers
+			for key := range influencers {
+				objId, _ := primitive.ObjectIDFromHex(influencers[key])
+
+				idsObjId = append(idsObjId, objId)
+			}
+
+			_, err = influencersCollection.UpdateMany(ctx, bson.D{{"_id", bson.M{"$in": idsObjId}}}, bson.D{{"$set", bson.D{{"updated_on", now}}}})
+
+			return c.JSON(http.StatusCreated, responses.GlobalResponse{Status: http.StatusCreated, Message: "Success update news", Data: nil})
+		}
+	}
 }
