@@ -76,6 +76,12 @@ func ListInfluencers(c echo.Context) error {
 		}
 	}
 
+	// handling filter by nationality [DONE]
+	if c.QueryParam("nationality") != "" {
+		nationality := strings.ToUpper(c.QueryParam("nationality"))
+		filterListData["nationality"] = nationality
+	}
+
 	// handling filter by gender
 
 	// by default sortby last update [DONE]
