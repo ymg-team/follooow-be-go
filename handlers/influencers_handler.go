@@ -85,7 +85,11 @@ func ListInfluencers(c echo.Context) error {
 	// handling filter by gender
 
 	// by default sortby last update [DONE]
-	optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
+	if c.QueryParam("order_by") == "created_on" {
+		optsListData = optsListData.SetSort(bson.D{{"created_on", -1}})
+	} else {
+		optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
+	}
 
 	// get data from database
 	results, err := influencersCollection.Find(ctx, filterListData, optsListData)

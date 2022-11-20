@@ -70,7 +70,11 @@ func ListNews(c echo.Context) error {
 	}
 
 	// by default sortby last update [DONE]
-	optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
+	if c.QueryParam("order_by") == "created_on" {
+		optsListData = optsListData.SetSort(bson.D{{"created_on", -1}})
+	} else {
+		optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
+	}
 
 	// get data from database
 	results, err := newsCollection.Find(ctx, filterListData, optsListData)
