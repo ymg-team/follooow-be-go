@@ -205,6 +205,8 @@ func AddInfluencer(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	now := time.Now().UnixNano() / int64(time.Millisecond)
+
 	payload := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&payload)
 	if err != nil {
@@ -215,7 +217,8 @@ func AddInfluencer(c echo.Context) error {
 			{"bio", payload["bio"]},
 			{"code", payload["code"]},
 			{"avatar", payload["avatar"]},
-			{"updated_on", time.Now().UnixNano() / int64(time.Millisecond)},
+			{"updated_on", now},
+			{"created_on", now},
 			{"nationality", payload["nationality"]},
 			{"gender", payload["gender"]},
 			{"socials", payload["socials"]},
