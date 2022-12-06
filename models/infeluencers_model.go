@@ -40,6 +40,7 @@ type InfluencerSmallDataModel struct {
 }
 
 type influencerSocial struct {
-	Link string `json:"link,omitempty"`
-	Type string `json:"type,omitempty"`
+	Link  string `json:"link,omitempty"`
+	Type  string `json:"type,omitempty"`
+	Title string `json:"title,omitempty"`
 }
