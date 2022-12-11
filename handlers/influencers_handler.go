@@ -225,6 +225,7 @@ func AddInfluencer(c echo.Context) error {
 			{"gender", payload["gender"]},
 			{"socials", payload["socials"]},
 			{"label", payload["label"]},
+			{"best_moments", payload["best_moments"]},
 			{"visits", 1}}
 
 		_, err := influencersCollection.InsertOne(ctx, new_data)
@@ -274,6 +275,7 @@ func UpdateInfluencer(c echo.Context) error {
 			{"gender", payload["gender"]},
 			{"socials", payload["socials"]},
 			{"label", payload["label"]},
+			{"best_moments", payload["best_moments"]},
 		}
 
 		update := bson.D{{"$set", new_data}}

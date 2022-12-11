@@ -17,7 +17,7 @@ type InfluencerModel struct {
 	Label       []string                `json:"label,omitempty"`
 	Views       int                     `json:"views,omitempty"`
 	Code        string                  `json:"code,omitempty"`
-	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty"`
+	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty" bson:"best_moments,omitempty"`
 }
 
 type InsertInfluencerModel struct {
@@ -32,7 +32,7 @@ type InsertInfluencerModel struct {
 	Label       []string                `json:"label,omitempty"`
 	Views       int                     `json:"views,omitempty"`
 	Code        string                  `json:"code,omitempty"`
-	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty"`
+	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty" bson:"best_moments,omitempty"`
 }
 
 type InfluencerSmallDataModel struct {
