@@ -5,32 +5,34 @@ import (
 )
 
 type InfluencerModel struct {
-	Id          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty" validate:"required"`
-	Name        string             `json:"name,omitempty" validate:"required"`
-	Avatar      string             `json:"avatar,omitempty"`
-	Bio         string             `json:"bio,omitempty"`
-	UpdatedOn   int                `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
-	Nationality string             `json:"nationality,omitempty"`
-	Gender      string             `json:"gender,omitempty"`
-	Visits      int                `json:"visits,omitempty"`
-	Socials     []influencerSocial `json:"socials,omitempty"`
-	Label       []string           `json:"label,omitempty"`
-	Views       int                `json:"views,omitempty"`
-	Code        string             `json:"code,omitempty"`
+	Id          primitive.ObjectID      `json:"id,omitempty" bson:"_id,omitempty" validate:"required"`
+	Name        string                  `json:"name,omitempty" validate:"required"`
+	Avatar      string                  `json:"avatar,omitempty"`
+	Bio         string                  `json:"bio,omitempty"`
+	UpdatedOn   int                     `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
+	Nationality string                  `json:"nationality,omitempty"`
+	Gender      string                  `json:"gender,omitempty"`
+	Visits      int                     `json:"visits,omitempty"`
+	Socials     []InfluencerSocial      `json:"socials,omitempty"`
+	Label       []string                `json:"label,omitempty"`
+	Views       int                     `json:"views,omitempty"`
+	Code        string                  `json:"code,omitempty"`
+	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty"`
 }
 
 type InsertInfluencerModel struct {
-	Name        string             `json:"name,omitempty" validate:"required"`
-	Avatar      string             `json:"avatar,omitempty"`
-	Bio         string             `json:"bio,omitempty"`
-	UpdatedOn   int                `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
-	Nationality string             `json:"nationality,omitempty"`
-	Gender      string             `json:"gender,omitempty"`
-	Visits      int                `json:"visits,omitempty"`
-	Socials     []influencerSocial `json:"socials,omitempty"`
-	Label       []string           `json:"label,omitempty"`
-	Views       int                `json:"views,omitempty"`
-	Code        string             `json:"code,omitempty"`
+	Name        string                  `json:"name,omitempty" validate:"required"`
+	Avatar      string                  `json:"avatar,omitempty"`
+	Bio         string                  `json:"bio,omitempty"`
+	UpdatedOn   int                     `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
+	Nationality string                  `json:"nationality,omitempty"`
+	Gender      string                  `json:"gender,omitempty"`
+	Visits      int                     `json:"visits,omitempty"`
+	Socials     []InfluencerSocial      `json:"socials,omitempty"`
+	Label       []string                `json:"label,omitempty"`
+	Views       int                     `json:"views,omitempty"`
+	Code        string                  `json:"code,omitempty"`
+	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty"`
 }
 
 type InfluencerSmallDataModel struct {
@@ -39,8 +41,14 @@ type InfluencerSmallDataModel struct {
 	Avatar string             `json:"avatar,omitempty"`
 }
 
-type influencerSocial struct {
+type InfluencerSocial struct {
 	Link  string `json:"link,omitempty"`
 	Type  string `json:"type,omitempty"`
 	Title string `json:"title,omitempty"`
+}
+
+type InfluencerBestMoments struct {
+	Image string `json:"image,omitempty"`
+	Text  string `json:"text,omitempty"`
+	Year  string `json:"year,omitempty"`
 }
