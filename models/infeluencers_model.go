@@ -1,6 +1,7 @@
 package models
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -48,13 +49,13 @@ type InfluencerSocial struct {
 }
 
 type InfluencerBestMoments struct {
-	Image      string                     `json:"image,omitempty"`
-	Text       string                     `json:"text,omitempty"`
-	Year       string                     `json:"year,omitempty"`
-	Background string                     `json:"background,omitempty"`
-	Style      InfluencerBestMomentsStyle `json:"style,omitempty"`
+	Image      string `json:"image,omitempty"`
+	Text       string `json:"text,omitempty"`
+	Year       string `json:"year,omitempty"`
+	Background string `json:"background,omitempty"`
+	Style      bson.M `json:"style,omitempty"`
 }
 
-type InfluencerBestMomentsStyle struct {
-	Margin string `json:"margin,omitempty"`
-}
+// type InfluencerBestMomentsStyle struct {
+// 	Margin string `json:"margin,omitempty"`
+// }
