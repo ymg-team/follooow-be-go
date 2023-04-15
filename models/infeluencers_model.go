@@ -48,9 +48,13 @@ type InfluencerSocial struct {
 }
 
 type InfluencerBestMoments struct {
-	Image      string      `json:"image,omitempty"`
-	Text       string      `json:"text,omitempty"`
-	Year       string      `json:"year,omitempty"`
-	Background string      `json:"background,omitempty"`
-	Style      interface{} `json:"style,omitempty"`
+	Image      string                     `json:"image,omitempty"`
+	Text       string                     `json:"text,omitempty"`
+	Year       string                     `json:"year,omitempty"`
+	Background string                     `json:"background,omitempty"`
+	Style      InfluencerBestMomentsStyle `json:"style,omitempty"`
+}
+
+type InfluencerBestMomentsStyle struct {
+	Margin string `json:"margin,omitempty"`
 }
