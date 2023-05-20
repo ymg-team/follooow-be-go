@@ -58,6 +58,11 @@ func ListNews(c echo.Context) error {
 
 	optsListData := options.Find().SetLimit(limit).SetSkip(page)
 
+	// handling filter by language
+	if c.QueryParam("lang") != "" {
+		filterListData["lang"] = c.QueryParam("lang")
+	}
+
 	// handling filter by search keyword [DONE]
 	if c.QueryParam("search") != "" {
 		filterListData["title"] = bson.M{"$regex": c.QueryParam("search"), "$options": "i"}
@@ -162,7 +167,17 @@ func DetailNews(c echo.Context) error {
 
 	objId, _ := primitive.ObjectIDFromHex(newsId)
 
-	err := newsCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&news)
+	filterListData := bson.M{}
+
+	filterListData["_id"] = objId
+	// filterListData["lang"] = c.QueryParam("lang")
+
+	// handling filter by language
+	if c.QueryParam("lang") != "" {
+		filterListData["lang"] = c.QueryParam("lang")
+	}
+
+	err := newsCollection.FindOne(ctx, filterListData).Decode(&news)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
@@ -241,7 +256,7 @@ func CreateNews(c echo.Context) error {
 			{"content", payload.Content},
 			{"tags", payload.Tags},
 			{"influencers", payload.Influencers},
-			{"lang", "EN"},
+			{"lang", payload.Lang},
 		}
 
 		_, err := newsCollection.InsertOne(ctx, new_data)
@@ -300,6 +315,7 @@ func UpdateNews(c echo.Context) error {
 			{"content", payload.Content},
 			{"tags", payload.Tags},
 			{"influencers", payload.Influencers},
+			{"lang", payload.Lang},
 		}
 
 		filter := bson.D{{"_id", objId}}

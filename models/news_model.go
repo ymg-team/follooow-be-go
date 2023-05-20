@@ -23,4 +23,5 @@ type PayloadNews struct {
 	Thumbnail   string   `json:"thumbnail,omitempty"`
 	Influencers []string `json:"influencers,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
+	Lang        string   `json:"tags,omitempty"`
 }
