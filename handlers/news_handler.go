@@ -81,6 +81,11 @@ func ListNews(c echo.Context) error {
 		optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
 	}
 
+	// handling filter by tags [DONE]
+	if c.QueryParam("tags") != "" {
+		filterListData["tags"] = bson.M{"$in": strings.Split(c.QueryParam("tags"), ",")}
+	}
+
 	// get data from database
 	results, err := newsCollection.Find(ctx, filterListData, optsListData)
 
@@ -175,11 +180,6 @@ func DetailNews(c echo.Context) error {
 	// handling filter by language
 	if c.QueryParam("lang") != "" {
 		filterListData["lang"] = c.QueryParam("lang")
-	}
-
-	// handling filter by label [DONE]
-	if c.QueryParam("tags") != "" {
-		filterListData["tags"] = bson.M{"$in": strings.Split(c.QueryParam("tags"), ",")}
 	}
 
 	err := newsCollection.FindOne(ctx, filterListData).Decode(&news)
