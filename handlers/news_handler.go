@@ -177,6 +177,11 @@ func DetailNews(c echo.Context) error {
 		filterListData["lang"] = c.QueryParam("lang")
 	}
 
+	// handling filter by label [DONE]
+	if c.QueryParam("tags") != "" {
+		filterListData["tags"] = bson.M{"$in": strings.Split(c.QueryParam("tags"), ",")}
+	}
+
 	err := newsCollection.FindOne(ctx, filterListData).Decode(&news)
 
 	if err != nil {
