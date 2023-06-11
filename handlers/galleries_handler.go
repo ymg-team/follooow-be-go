@@ -1,0 +1,212 @@
+package handlers
+
+import (
+	"context"
+	"follooow-be/configs"
+	"follooow-be/models"
+	"follooow-be/responses"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+var galleryCollection *mongo.Collection = configs.GetCollection(configs.DB, "galleries")
+
+// handler of GET /influencers
+func ListGalleries(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var galleries []models.GalleryModel
+
+	filterListData := bson.M{}
+
+	var limit int64
+	var page int64
+
+	// handling limit, by default 6
+	if c.QueryParam("limit") != "" {
+		i, err := strconv.ParseInt(c.QueryParam("limit"), 10, 64)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+		}
+		limit = i
+	} else {
+		limit = int64(6)
+	}
+
+	// handling page, by default 1
+	if c.QueryParam("page") != "" {
+		i, err := strconv.ParseInt(c.QueryParam("page"), 10, 64)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+		}
+		page = (i - 1) * limit
+	} else {
+		page = int64(0)
+	}
+
+	optsListData := options.Find().SetLimit(limit).SetSkip(page)
+
+	// handling filter by language
+	if c.QueryParam("lang") != "" {
+		filterListData["lang"] = c.QueryParam("lang")
+	}
+
+	// get data from database
+	results, err := galleryCollection.Find(ctx, filterListData, optsListData)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	// get count data from database
+	count, err := galleryCollection.CountDocuments(ctx, filterListData)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	// reading data from db in an optimal way
+	defer results.Close(ctx)
+
+	// normalize db results
+	for results.Next(ctx) {
+		var singleGallery models.GalleryModel
+		var influencers []models.InfluencerSmallDataModel
+
+		if err = results.Decode(&singleGallery); err != nil {
+			return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+		}
+
+		// convert influencers to data
+		if len(singleGallery.Influencers) > 0 {
+			// get all influencers on post
+			// max result is 20
+			optsListDataInfluencers := options.Find().SetLimit(20)
+
+			// filter generator
+			filterListDataInfluencers := bson.D{}
+
+			idsArr := singleGallery.Influencers
+			var idsObjId []primitive.ObjectID
+
+			// normalize ids
+			for key := range idsArr {
+				objId, _ := primitive.ObjectIDFromHex(idsArr[key])
+				idsObjId = append(idsObjId, objId)
+			}
+
+			filterListDataInfluencers = bson.D{{"_id", bson.M{"$in": idsObjId}}}
+
+			// get data from database
+			resultsInfluencers, err := influencersCollection.Find(ctx, filterListDataInfluencers, optsListDataInfluencers)
+			defer resultsInfluencers.Close(ctx)
+			// normalize db results
+			for resultsInfluencers.Next(ctx) {
+				var singleInfluencer models.InfluencerSmallDataModel
+				if err = resultsInfluencers.Decode(&singleInfluencer); err != nil {
+					return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+				}
+
+				influencers = append(influencers, singleInfluencer)
+			}
+
+			singleGallery.Influencers = nil
+			singleGallery.InfluencersData = influencers
+		}
+
+		galleries = append(galleries, singleGallery)
+	}
+
+	// check is no data available
+	if len(galleries) < 1 {
+		return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusNoContent, Message: "Gallery not available", Data: &echo.Map{"galleries": galleries, "total": count}})
+	} else {
+		return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "success", Data: &echo.Map{"galleries": galleries, "total": count}})
+	}
+
+}
+
+// handle of GET /influencers/<id>
+func DetailGallery(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// get influencer_id
+	galleryId := c.Param("gallery_id")
+	var gallery models.GalleryModel
+	var influencers []models.InfluencerSmallDataModel
+
+	objId, _ := primitive.ObjectIDFromHex(galleryId)
+
+	filterListData := bson.M{}
+
+	filterListData["_id"] = objId
+
+	// handling filter by language
+	if c.QueryParam("lang") != "" {
+		filterListData["lang"] = c.QueryParam("lang")
+	}
+
+	err := galleryCollection.FindOne(ctx, filterListData).Decode(&gallery)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	// update views + 1
+	_, err = galleryCollection.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"views", gallery.Views + 1}}}})
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+	}
+
+	// get influencers data
+
+	// convert influencers to data
+	if len(gallery.Influencers) > 0 {
+		// get all influencers on post
+		// max result is 20
+		optsListDataInfluencers := options.Find().SetLimit(20)
+
+		// filter generator
+		filterListDataInfluencers := bson.D{}
+
+		idsArr := gallery.Influencers
+		var idsObjId []primitive.ObjectID
+
+		// normalize ids
+		for key := range idsArr {
+			objId, _ := primitive.ObjectIDFromHex(idsArr[key])
+			idsObjId = append(idsObjId, objId)
+		}
+
+		// filter generator
+		filterListDataInfluencers = bson.D{{"_id", bson.M{"$in": idsObjId}}}
+
+		// get data from database
+		resultsInfluencers, err := influencersCollection.Find(ctx, filterListDataInfluencers, optsListDataInfluencers)
+		defer resultsInfluencers.Close(ctx)
+		// normalize db results
+		for resultsInfluencers.Next(ctx) {
+			var singleInfluencer models.InfluencerSmallDataModel
+			if err = resultsInfluencers.Decode(&singleInfluencer); err != nil {
+				return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
+			}
+
+			influencers = append(influencers, singleInfluencer)
+		}
+
+		gallery.Influencers = nil
+		gallery.InfluencersData = influencers
+	}
+	// end of get all influencers on post
+	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"gallery": gallery}})
+}

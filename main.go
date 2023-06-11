@@ -18,6 +18,7 @@ func main() {
 	// routes
 	routes.InfluencerRoute(e)
 	routes.NewsRoute(e)
+	routes.GalleriesRoute(e)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello World")
