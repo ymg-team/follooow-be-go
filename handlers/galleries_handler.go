@@ -7,6 +7,7 @@ import (
 	"follooow-be/responses"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -57,6 +58,12 @@ func ListGalleries(c echo.Context) error {
 	// handling filter by language
 	if c.QueryParam("lang") != "" {
 		filterListData["lang"] = c.QueryParam("lang")
+	}
+
+	// handling filter by influencer id keyword [DONE]
+	if c.QueryParam("influencer_ids") != "" {
+		idsArr := strings.Split(c.QueryParam("influencer_ids"), ",")
+		filterListData["influencers"] = bson.M{"$in": idsArr}
 	}
 
 	// get data from database
