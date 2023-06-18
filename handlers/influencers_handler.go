@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"follooow-be/configs"
 	"follooow-be/models"
+	"follooow-be/repositories"
 	"follooow-be/responses"
 	"net/http"
 	"strconv"
@@ -131,28 +132,15 @@ func ListInfluencers(c echo.Context) error {
 
 // handler of GET /influencers/:id
 func DetailInfluencers(c echo.Context) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	// get influencer_id
 	influencerId := c.Param("influencer_id")
-	var influencer models.InfluencerModel
 
-	objId, _ := primitive.ObjectIDFromHex(influencerId)
-
-	err := influencersCollection.FindOne(ctx, bson.M{"_id": objId}).Decode(&influencer)
+	err, result := repositories.GetDetailInfluencers(influencerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
 	}
 
-	// update visits + 1
-	_, err = influencersCollection.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"visits", influencer.Visits + 1}}}})
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
-	}
-
-	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"influencer": influencer}})
+	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"influencer": result}})
 }
 
 // handler of GET /influencers/quick-find
