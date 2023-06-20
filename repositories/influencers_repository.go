@@ -13,6 +13,9 @@ import (
 
 var influencersCollections *mongo.Collection = configs.GetCollection(configs.DB, "influencers")
 
+/**
+function to get detail influencer by influencer_id, auto increase visits + 1 if data found on DB
+*/
 func GetDetailInfluencers(influencer_id string) (error, models.InfluencerModel) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
