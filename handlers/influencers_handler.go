@@ -132,9 +132,13 @@ func ListInfluencers(c echo.Context) error {
 
 // handler of GET /influencers/:id
 func DetailInfluencers(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	//get influencer ids form query
 	influencerId := c.Param("influencer_id")
 
-	err, result := repositories.GetDetailInfluencers(influencerId)
+	err, result := repositories.GetDetailInfluencers(ctx, influencerId)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
