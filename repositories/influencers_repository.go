@@ -4,7 +4,6 @@ import (
 	"context"
 	"follooow-be/configs"
 	"follooow-be/models"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,9 +12,10 @@ import (
 
 var influencersCollections *mongo.Collection = configs.GetCollection(configs.DB, "influencers")
 
-func GetDetailInfluencers(influencer_id string) (error, models.InfluencerModel) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+/**
+function to get detail influencer by influencer_id, auto increase visits + 1 if data found on DB
+*/
+func GetDetailInfluencers(ctx context.Context, influencer_id string) (error, models.InfluencerModel) {
 
 	var influencer models.InfluencerModel
 	objId, _ := primitive.ObjectIDFromHex(influencer_id)
