@@ -66,6 +66,15 @@ func ListGalleries(c echo.Context) error {
 		filterListData["influencers"] = bson.M{"$in": idsArr}
 	}
 
+	// by default sortby last update [DONE]
+	if c.QueryParam("order_by") == "created_on" {
+		optsListData = optsListData.SetSort(bson.D{{"created_on", -1}})
+	} else if c.QueryParam("order_by") == "popular" {
+		optsListData = optsListData.SetSort(bson.D{{"views", -1}})
+	} else {
+		optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
+	}
+
 	// get data from database
 	results, err := galleryCollection.Find(ctx, filterListData, optsListData)
 
