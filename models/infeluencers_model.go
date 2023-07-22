@@ -11,7 +11,7 @@ type InfluencerModel struct {
 	Avatar      string                  `json:"avatar,omitempty"`
 	Bio         string                  `json:"bio,omitempty"`
 	UpdatedOn   int                     `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
-	Nationality string                  `json:"nationality,omitempty"`
+	Nationality interface{}             `json:"nationality,omitempty"`
 	Gender      string                  `json:"gender,omitempty"`
 	Visits      int                     `json:"visits,omitempty"`
 	Socials     []InfluencerSocial      `json:"socials,omitempty"`
