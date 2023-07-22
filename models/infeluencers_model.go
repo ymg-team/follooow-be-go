@@ -26,13 +26,13 @@ type InsertInfluencerModel struct {
 	Avatar      string                  `json:"avatar,omitempty"`
 	Bio         string                  `json:"bio,omitempty"`
 	UpdatedOn   int                     `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
-	Nationality string                  `json:"nationality,omitempty"`
+	Nationality interface{}             `json:"nationality,omitempty"`
 	Gender      string                  `json:"gender,omitempty"`
 	Visits      int                     `json:"visits,omitempty"`
 	Socials     []InfluencerSocial      `json:"socials,omitempty"`
 	Label       []string                `json:"label,omitempty"`
 	Views       int                     `json:"views,omitempty"`
-	Code        interface{}             `json:"code,omitempty"`
+	Code        string                  `json:"code,omitempty"`
 	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty" bson:"best_moments,omitempty"`
 }
 
