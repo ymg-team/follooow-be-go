@@ -32,7 +32,7 @@ type InsertInfluencerModel struct {
 	Socials     []InfluencerSocial      `json:"socials,omitempty"`
 	Label       []string                `json:"label,omitempty"`
 	Views       int                     `json:"views,omitempty"`
-	Code        string                  `json:"code,omitempty"`
+	Code        interface{}             `json:"code,omitempty"`
 	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty" bson:"best_moments,omitempty"`
 }
 
