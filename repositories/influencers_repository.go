@@ -12,9 +12,8 @@ import (
 
 var influencersCollections *mongo.Collection = configs.GetCollection(configs.DB, "influencers")
 
-/**
-function to get detail influencer by influencer_id, auto increase visits + 1 if data found on DB
-*/
+// function to get detail influencer by influencer_id
+// auto increase visits + 1 if data found on DB
 func GetDetailInfluencers(ctx context.Context, influencer_id string) (error, models.InfluencerModel) {
 
 	var influencer models.InfluencerModel
