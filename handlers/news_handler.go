@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"follooow-be/configs"
 	"follooow-be/models"
+	"follooow-be/repositories"
 	"follooow-be/responses"
 	"net/http"
 	"strconv"
@@ -167,76 +168,26 @@ func DetailNews(c echo.Context) error {
 	defer cancel()
 	// get influencer_id
 	newsId := c.Param("news_id")
-	var news models.NewsModel
-	var influencers []models.InfluencerSmallDataModel
 
-	objId, _ := primitive.ObjectIDFromHex(newsId)
+	lang := "ID"
 
-	filterListData := bson.M{}
-
-	filterListData["_id"] = objId
-	// filterListData["lang"] = c.QueryParam("lang")
-
-	// handling filter by language
 	if c.QueryParam("lang") != "" {
-		filterListData["lang"] = c.QueryParam("lang")
+		lang = c.QueryParam("lang")
 	}
 
-	err := newsCollection.FindOne(ctx, filterListData).Decode(&news)
+	params := repositories.DetailNewsParams{
+		NewsId: newsId,
+		Lang:   lang,
+	}
+
+	err, result := repositories.GetDetailNews(ctx, params)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
 	}
 
-	// update views + 1
-	_, err = newsCollection.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"views", news.Views + 1}}}})
+	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"influencer": result}})
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
-	}
-
-	// get influencers data
-
-	// convert influencers to data
-	if len(news.Influencers) > 0 {
-		// get all influencers on post
-		// max result is 20
-		optsListDataInfluencers := options.Find().SetLimit(20)
-
-		// filter generator
-		filterListDataInfluencers := bson.D{}
-
-		idsArr := news.Influencers
-		var idsObjId []primitive.ObjectID
-
-		// normalize ids
-		for key := range idsArr {
-			objId, _ := primitive.ObjectIDFromHex(idsArr[key])
-			idsObjId = append(idsObjId, objId)
-		}
-
-		// filter generator
-		filterListDataInfluencers = bson.D{{"_id", bson.M{"$in": idsObjId}}}
-
-		// get data from database
-		resultsInfluencers, err := influencersCollection.Find(ctx, filterListDataInfluencers, optsListDataInfluencers)
-		defer resultsInfluencers.Close(ctx)
-		// normalize db results
-		for resultsInfluencers.Next(ctx) {
-			var singleInfluencer models.InfluencerSmallDataModel
-			if err = resultsInfluencers.Decode(&singleInfluencer); err != nil {
-				return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
-			}
-
-			influencers = append(influencers, singleInfluencer)
-		}
-
-		news.Influencers = nil
-		news.InfluencersData = influencers
-	}
-	// end of get all influencers on post
-
-	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"news": news}})
 }
 
 // handle of POST /news
