@@ -17,7 +17,7 @@ type DetailNewsParams struct {
 	Lang   string
 }
 
-var newsCollections *mongo.Collection = configs.GetCollection(configs.DB, "news")
+var NewsCollections *mongo.Collection = configs.GetCollection(configs.DB, "news")
 
 // function to to get detail by news_id
 // auto increase visits + 1 if data found on DB
@@ -31,11 +31,11 @@ func GetDetailNews(ctx context.Context, params DetailNewsParams) (error, models.
 		"lang": params.Lang,
 	}
 
-	err := newsCollections.FindOne(ctx, filterListData).Decode(&news)
+	err := NewsCollections.FindOne(ctx, filterListData).Decode(&news)
 
 	if err == nil {
 		// increase visits
-		newsCollections.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"views", news.Views + 1}}}})
+		NewsCollections.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"views", news.Views + 1}}}})
 
 		// get list related influencers, max results is 20
 		var idsObjId []primitive.ObjectID
@@ -54,7 +54,7 @@ func GetDetailNews(ctx context.Context, params DetailNewsParams) (error, models.
 		filterLastDataInfluencers := bson.D{{"_id", bson.M{"$in": idsObjId}}}
 
 		// get influencer data from database
-		resultsInfluencers, _ := influencersCollections.Find(ctx, filterLastDataInfluencers, optsListDataInfluencers)
+		resultsInfluencers, _ := InfluencersCollections.Find(ctx, filterLastDataInfluencers, optsListDataInfluencers)
 		defer resultsInfluencers.Close(ctx)
 
 		// normalize db results

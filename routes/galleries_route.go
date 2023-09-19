@@ -10,4 +10,5 @@ func GalleriesRoute(e *echo.Echo) {
 	// all routes relates to influencers comes here
 	e.GET("/galleries", handlers.ListGalleries)
 	e.GET("/galleries/:gallery_id", handlers.DetailGallery)
+	e.POST("/galleries", handlers.CreateGallery)
 }

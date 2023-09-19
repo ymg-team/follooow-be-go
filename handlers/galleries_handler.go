@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"follooow-be/configs"
 	"follooow-be/models"
+	"follooow-be/repositories"
 	"follooow-be/responses"
 	"net/http"
 	"strconv"
@@ -150,7 +152,7 @@ func ListGalleries(c echo.Context) error {
 
 }
 
-// handle of GET /influencers/<id>
+// handle of GET /galleries/<id>
 func DetailGallery(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -225,4 +227,31 @@ func DetailGallery(c echo.Context) error {
 	}
 	// end of get all influencers on post
 	return c.JSON(http.StatusOK, responses.GlobalResponse{Status: http.StatusOK, Message: "OK", Data: &echo.Map{"gallery": gallery}})
+}
+
+// handle of POST /galleries
+func CreateGallery(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var payload models.PayloadGallery
+	err := json.NewDecoder(c.Request().Body).Decode(&payload)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
+	} else {
+		err = repositories.CreateGallery(ctx, repositories.CreateGalleryParams{
+			Title:       payload.Title,
+			Description: payload.Description,
+			Images:      payload.Images,
+			Influencers: payload.Influencers,
+			Lang:        payload.Lang,
+		})
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error insert data", Data: nil})
+		} else {
+			return c.JSON(http.StatusCreated, responses.GlobalResponse{Status: http.StatusCreated, Message: "Success create gallery", Data: nil})
+		}
+	}
 }

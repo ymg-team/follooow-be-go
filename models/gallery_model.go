@@ -24,7 +24,7 @@ type GalleryModel struct {
 	Views           int                        `json:"views, omitempty"  validate:"required"`
 }
 
-type PayloadModel struct {
+type PayloadGallery struct {
 	Title       string       `json:"title, omitempty"`
 	Description string       `json:"description, omitempty"`
 	Images      []ImageModel `json:"images, omitempty"`
