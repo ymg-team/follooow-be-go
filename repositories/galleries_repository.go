@@ -4,6 +4,7 @@ import (
 	"context"
 	"follooow-be/configs"
 	"follooow-be/models"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,9 +27,13 @@ type CreateGalleryParams struct {
 func CreateGallery(ctx context.Context, params CreateGalleryParams) error {
 	// get now times
 	now := time.Now().UnixNano() / int64(time.Millisecond)
+	// ref: https://stackoverflow.com/a/8689281/2780875
+	slug := strings.Replace(params.Title, " ", "-", -1)
+	slug = strings.ToLower(slug)
 	newData := bson.D{
 		{"title", params.Title},
 		{"description", params.Description},
+		{"slug", slug},
 		{"views", 1},
 		{"updated_on", now},
 		{"created_on", now},

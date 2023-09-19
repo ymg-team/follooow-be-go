@@ -15,6 +15,7 @@ type NewsModel struct {
 	Tags            []string                   `json:"tags,omitempty" validate:"required"`
 	Influencers     []string                   `json:"influencers,omitempty"`
 	InfluencersData []InfluencerSmallDataModel `json:"influencers_data,omitempty"`
+	Slug            string                     `json:"slug,omitempty"`
 }
 
 type PayloadNews struct {

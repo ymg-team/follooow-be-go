@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"follooow-be/configs"
 	"follooow-be/models"
 	"follooow-be/repositories"
@@ -203,6 +204,12 @@ func CreateNews(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
 	} else {
+
+		stringTitle := fmt.Sprintf("%v", payload.Title)
+		// ref: https://stackoverflow.com/a/8689281/2780875
+		slug := strings.Replace(stringTitle, " ", "-", -1)
+		slug = strings.ToLower(slug)
+
 		new_data := bson.D{
 			{"title", payload.Title},
 			{"views", 1},
@@ -213,6 +220,7 @@ func CreateNews(c echo.Context) error {
 			{"tags", payload.Tags},
 			{"influencers", payload.Influencers},
 			{"lang", payload.Lang},
+			{"slug", slug},
 		}
 
 		_, err := newsCollection.InsertOne(ctx, new_data)

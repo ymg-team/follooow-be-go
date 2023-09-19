@@ -22,6 +22,7 @@ type GalleryModel struct {
 	InfluencersData []InfluencerSmallDataModel `json:"influencers_data,omitempty"  validate:"required"`
 	Lang            string                     `json:"lang, omitempty"  validate:"required"`
 	Views           int                        `json:"views, omitempty"  validate:"required"`
+	Slug            int                        `json:"slug, omitempty"  validate:"required"`
 }
 
 type PayloadGallery struct {
