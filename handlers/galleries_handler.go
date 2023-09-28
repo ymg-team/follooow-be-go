@@ -92,6 +92,7 @@ func ListGalleries(c echo.Context) error {
 	}
 
 	// reading data from db in an optimal way
+	// defer use to delay execution
 	defer results.Close(ctx)
 
 	// normalize db results

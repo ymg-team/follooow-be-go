@@ -203,13 +203,14 @@ func AddInfluencer(c echo.Context) error {
 
 	payload := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&payload)
+
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
 	} else {
 		new_data := bson.D{
 			{"name", payload["name"]},
 			{"bio", payload["bio"]},
-			{"code", payload["code"]},
+			{"code", payload["slug"]},
 			{"avatar", payload["avatar"]},
 			{"updated_on", now},
 			{"created_on", now},
@@ -220,11 +221,16 @@ func AddInfluencer(c echo.Context) error {
 			{"best_moments", payload["best_moments"]},
 			{"visits", 1}}
 
-		_, err := influencersCollection.InsertOne(ctx, new_data)
+		result, err := influencersCollection.InsertOne(ctx, new_data)
 
 		if err != nil {
+
 			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error insert data", Data: nil})
 		} else {
+			// send info to Telegram channel
+			// chatMessage := "Added infuencers \n" + payload["name"].(string) + "\nlabel:" + label + "\nhttps://follooow.com/id/influencers/" + payload["slug"].(string) + "-" + result.InsertedID.(primitive.ObjectID).Hex()
+			chatMessage := "Added infuencers \n" + payload["name"].(string) + "\nhttps://follooow.com/id/influencers/" + payload["slug"].(string) + "-" + result.InsertedID.(primitive.ObjectID).Hex()
+			repositories.TelegramSendMessage(chatMessage)
 			return c.JSON(http.StatusCreated, responses.GlobalResponse{Status: http.StatusCreated, Message: "Success add influencer", Data: nil})
 		}
 
@@ -260,7 +266,7 @@ func UpdateInfluencer(c echo.Context) error {
 		new_data := bson.D{
 			{"name", payload["name"]},
 			{"bio", payload["bio"]},
-			{"code", payload["code"]},
+			{"code", payload["slug"]},
 			{"avatar", payload["avatar"]},
 			{"updated_on", time.Now().UnixNano() / int64(time.Millisecond)},
 			{"nationality", payload["nationality"]},
