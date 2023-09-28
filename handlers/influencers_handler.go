@@ -201,24 +201,24 @@ func AddInfluencer(c echo.Context) error {
 
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 
-	payload := make(map[string]interface{})
+	var payload models.PayloadInfluencer
 	err := json.NewDecoder(c.Request().Body).Decode(&payload)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
 	} else {
 		new_data := bson.D{
-			{"name", payload["name"]},
-			{"bio", payload["bio"]},
-			{"code", payload["slug"]},
-			{"avatar", payload["avatar"]},
+			{"name", payload.Name},
+			{"bio", payload.Bio},
+			{"code", payload.Slug},
+			{"avatar", payload.Avatar},
 			{"updated_on", now},
 			{"created_on", now},
-			{"nationality", payload["nationality"]},
-			{"gender", payload["gender"]},
-			{"socials", payload["socials"]},
-			{"label", payload["label"]},
-			{"best_moments", payload["best_moments"]},
+			{"nationality", payload.Nationality},
+			{"gender", payload.Gender},
+			{"socials", payload.Socials},
+			{"label", payload.Label},
+			{"best_moments", payload.BestMoments},
 			{"visits", 1}}
 
 		result, err := influencersCollection.InsertOne(ctx, new_data)
@@ -228,8 +228,13 @@ func AddInfluencer(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error insert data", Data: nil})
 		} else {
 			// send info to Telegram channel
-			// chatMessage := "Added infuencers \n" + payload["name"].(string) + "\nlabel:" + label + "\nhttps://follooow.com/id/influencers/" + payload["slug"].(string) + "-" + result.InsertedID.(primitive.ObjectID).Hex()
-			chatMessage := "Added infuencers \n" + payload["name"].(string) + "\nhttps://follooow.com/id/influencers/" + payload["slug"].(string) + "-" + result.InsertedID.(primitive.ObjectID).Hex()
+			labels := ""
+			for _, n := range payload.Label {
+				labels = "#" + strings.ReplaceAll(n, " ", "") + " " + labels
+			}
+			chatMessage := "Added infuencers:\n" + payload.Name +
+				"\nhttps://follooow.com/id/influencers/" + payload.Slug + "-" + result.InsertedID.(primitive.ObjectID).Hex() +
+				"\nLabel: " + labels
 			repositories.TelegramSendMessage(chatMessage)
 			return c.JSON(http.StatusCreated, responses.GlobalResponse{Status: http.StatusCreated, Message: "Success add influencer", Data: nil})
 		}

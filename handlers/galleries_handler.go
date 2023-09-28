@@ -241,17 +241,30 @@ func CreateGallery(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error parsing json", Data: nil})
 	} else {
-		err = repositories.CreateGallery(ctx, repositories.CreateGalleryParams{
+
+		// ref: https://stackoverflow.com/a/8689281/2780875
+		slug := strings.Replace(payload.Title, " ", "-", -1)
+		slug = strings.ToLower(slug)
+
+		// insert data to db
+		result, errInsertGallery := repositories.CreateGallery(ctx, repositories.CreateGalleryParams{
 			Title:       payload.Title,
 			Description: payload.Description,
 			Images:      payload.Images,
 			Influencers: payload.Influencers,
 			Lang:        payload.Lang,
+			Slug:        slug,
 		})
 
-		if err != nil {
+		if errInsertGallery != nil {
 			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error insert data", Data: nil})
 		} else {
+			// post gallery to telegram channel
+
+			chatMessage := "New Gallery:\n" + payload.Title +
+				"\nhttps://follooow.com/" + payload.Lang + "/gallery/" + slug + "-" + result.InsertedID.(primitive.ObjectID).Hex()
+			repositories.TelegramSendMessage(chatMessage)
+			// end of gallery news to telegram channel
 			return c.JSON(http.StatusCreated, responses.GlobalResponse{Status: http.StatusCreated, Message: "Success create gallery", Data: nil})
 		}
 	}

@@ -59,3 +59,15 @@ type InfluencerBestMoments struct {
 // type InfluencerBestMomentsStyle struct {
 // 	Margin string `json:"margin,omitempty"`
 // }
+
+type PayloadInfluencer struct {
+	Name        string                  `json:"name, omitempty"`
+	Bio         string                  `json:"bio, omitempty"`
+	Slug        string                  `json:"slug, omitempty"`
+	Avatar      string                  `json:"avatar, omitempty"`
+	Nationality []string                `json:"nationality, omitempty"`
+	Gender      string                  `json:"gender, omitempty"`
+	Socials     []InfluencerSocial      `json:"socials, omitempty"`
+	Label       []string                `json:"label, omitempty"`
+	BestMoments []InfluencerBestMoments `json:"best_moments, omitempty"`
+}

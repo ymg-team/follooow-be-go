@@ -223,11 +223,23 @@ func CreateNews(c echo.Context) error {
 			{"slug", slug},
 		}
 
-		_, err := newsCollection.InsertOne(ctx, new_data)
+		// insert new data to db
+		result, err := newsCollection.InsertOne(ctx, new_data)
 
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, responses.GlobalResponse{Status: http.StatusBadRequest, Message: "Error insert data", Data: nil})
 		} else {
+
+			// post news to telegram channel
+			tags := ""
+			for _, n := range payload.Tags {
+				tags = "#" + strings.ReplaceAll(n, " ", "") + " " + tags
+			}
+			chatMessage := "New Update:\n" + payload.Title +
+				"\nhttps://follooow.com/" + payload.Lang + "/news/" + slug + "-" + result.InsertedID.(primitive.ObjectID).Hex() +
+				"\n" + tags
+			repositories.TelegramSendMessage(chatMessage)
+			// end of post news to telegram channel
 
 			var idsObjId []primitive.ObjectID
 

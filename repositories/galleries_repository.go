@@ -4,7 +4,6 @@ import (
 	"context"
 	"follooow-be/configs"
 	"follooow-be/models"
-	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,20 +19,19 @@ type CreateGalleryParams struct {
 	Images      []models.ImageModel
 	Influencers []string
 	Lang        string
+	Slug        string
 }
 
 // function to create new gallery
 // auto update updated_on on related influncers
-func CreateGallery(ctx context.Context, params CreateGalleryParams) error {
+func CreateGallery(ctx context.Context, params CreateGalleryParams) (*mongo.InsertOneResult, error) {
 	// get now times
 	now := time.Now().UnixNano() / int64(time.Millisecond)
 	// ref: https://stackoverflow.com/a/8689281/2780875
-	slug := strings.Replace(params.Title, " ", "-", -1)
-	slug = strings.ToLower(slug)
 	newData := bson.D{
 		{"title", params.Title},
 		{"description", params.Description},
-		{"slug", slug},
+		{"slug", params.Slug},
 		{"views", 1},
 		{"updated_on", now},
 		{"created_on", now},
@@ -43,14 +41,14 @@ func CreateGallery(ctx context.Context, params CreateGalleryParams) error {
 	}
 
 	// insert data to database
-	_, err := GalleryCollections.InsertOne(ctx, newData)
+	result, err := GalleryCollections.InsertOne(ctx, newData)
 	if err != nil {
 		// stop process if error
-		return err
+		return result, err
 	} else {
 		// update influencers updated_on
 		err = InfluencersUpdateOnToNow(ctx, params.Influencers)
-		return err
+		return result, err
 	}
 
 }
