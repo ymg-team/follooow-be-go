@@ -5,6 +5,7 @@ import (
 )
 
 type ImageModel struct {
+	IsCover   string `json:"is_cover, omitempty" validate:"required"`
 	Url       string `json:"url, omitempty" validate:"required"`
 	Caption   string `json:"caption, omitempty" validate:"required"`
 	CreatedOn int    `json:"created_on, omitempty" validate:"required"`
@@ -22,7 +23,7 @@ type GalleryModel struct {
 	InfluencersData []InfluencerSmallDataModel `json:"influencers_data,omitempty"  validate:"required"`
 	Lang            string                     `json:"lang, omitempty"  validate:"required"`
 	Views           int                        `json:"views, omitempty"  validate:"required"`
-	Slug            int                        `json:"slug, omitempty"  validate:"required"`
+	Slug            string                     `json:"slug, omitempty"  validate:"required"`
 }
 
 type PayloadGallery struct {
