@@ -5,7 +5,7 @@ import (
 )
 
 type ImageModel struct {
-	IsCover   string `json:"is_cover, omitempty" validate:"required"`
+	IsCover   bool   `json:"is_cover, omitempty" validate:"required"`
 	Url       string `json:"url, omitempty" validate:"required"`
 	Caption   string `json:"caption, omitempty" validate:"required"`
 	CreatedOn int    `json:"created_on, omitempty" validate:"required"`
