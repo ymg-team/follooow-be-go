@@ -15,7 +15,7 @@ var InfluencersCollections *mongo.Collection = configs.GetCollection(configs.DB,
 
 // function to get detail influencer by influencer_id
 // auto increase visits + 1 if data found on DB
-func GetDetailInfluencers(ctx context.Context, influencer_id string) (error, models.InfluencerModel) {
+func GetDetailInfluencers(ctx context.Context, influencer_id string, lang string) (error, models.InfluencerModel) {
 
 	var influencer models.InfluencerModel
 	objId, _ := primitive.ObjectIDFromHex(influencer_id)
@@ -29,6 +29,7 @@ func GetDetailInfluencers(ctx context.Context, influencer_id string) (error, mod
 		var influencerIds []string
 		influencerIds = append(influencerIds, influencer_id)
 		filterListData["influencers"] = bson.M{"$in": influencerIds}
+		filterListData["lang"] = lang
 
 		countNews, _ := NewsCollections.CountDocuments(ctx, filterListData)
 		countGallery, _ := GalleryCollections.CountDocuments(ctx, filterListData)

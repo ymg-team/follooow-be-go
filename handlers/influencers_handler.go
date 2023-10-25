@@ -137,8 +137,13 @@ func DetailInfluencers(c echo.Context) error {
 
 	//get influencer ids form query
 	influencerId := c.Param("influencer_id")
+	lang := "id"
 
-	err, result := repositories.GetDetailInfluencers(ctx, influencerId)
+	if c.QueryParam("lang") != "" {
+		lang = c.QueryParam("lang")
+	}
+
+	err, result := repositories.GetDetailInfluencers(ctx, influencerId, lang)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.GlobalResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"error": err.Error()}})
