@@ -13,12 +13,18 @@ type InfluencerModel struct {
 	UpdatedOn   int                     `json:"updated_on,omitempty" bson:"updated_on,omitempty"`
 	Nationality interface{}             `json:"nationality,omitempty"`
 	Gender      string                  `json:"gender,omitempty"`
-	Visits      int                     `json:"visits,omitempty"`
+	Visits      int                     `json:"visits"`
 	Socials     []InfluencerSocial      `json:"socials,omitempty"`
 	Label       []string                `json:"label,omitempty"`
-	Views       int                     `json:"views,omitempty"`
+	Views       int                     `json:"views"`
 	Code        string                  `json:"code,omitempty"`
 	BestMoments []InfluencerBestMoments `json:"best_moments,omitempty" bson:"best_moments,omitempty"`
+	Stats       StatsInfluencerModel    `json:"stats,omitempty" `
+}
+
+type StatsInfluencerModel struct {
+	TotalNews    int `json:"total_news"`
+	TotalGallery int `json:"total_gallery",default:0`
 }
 
 type InsertInfluencerModel struct {

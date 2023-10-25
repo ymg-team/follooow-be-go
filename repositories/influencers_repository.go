@@ -23,6 +23,19 @@ func GetDetailInfluencers(ctx context.Context, influencer_id string) (error, mod
 	err := InfluencersCollections.FindOne(ctx, bson.M{"_id": objId}).Decode(&influencer)
 
 	if err == nil {
+		// get count data
+		// filter generaor
+		filterListData := bson.M{}
+		var influencerIds []string
+		influencerIds = append(influencerIds, influencer_id)
+		filterListData["influencers"] = bson.M{"$in": influencerIds}
+
+		countNews, _ := NewsCollections.CountDocuments(ctx, filterListData)
+		countGallery, _ := GalleryCollections.CountDocuments(ctx, filterListData)
+
+		influencer.Stats.TotalNews = int(countNews)
+		influencer.Stats.TotalGallery = int(countGallery)
+
 		// increase visits
 		InfluencersCollections.UpdateOne(ctx, bson.D{{"_id", objId}}, bson.D{{"$set", bson.D{{"visits", influencer.Visits + 1}}}})
 	}
