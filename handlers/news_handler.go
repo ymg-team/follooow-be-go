@@ -77,8 +77,10 @@ func ListNews(c echo.Context) error {
 	}
 
 	// by default sortby last update [DONE]
-	if c.QueryParam("order_by") == "created_on" {
+	if c.QueryParam("order_by") == "created_on" { // oldeset created
 		optsListData = optsListData.SetSort(bson.D{{"created_on", 1}})
+	} else if c.QueryParam("order_by") == "created_on_new" { // latest created
+		optsListData = optsListData.SetSort(bson.D{{"created_on", -1}})
 	} else {
 		optsListData = optsListData.SetSort(bson.D{{"updated_on", -1}})
 	}

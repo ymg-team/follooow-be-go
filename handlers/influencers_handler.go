@@ -86,8 +86,10 @@ func ListInfluencers(c echo.Context) error {
 	// handling filter by gender
 
 	// by default sortby last update [DONE]
-	if c.QueryParam("order_by") == "created_on" {
+	if c.QueryParam("order_by") == "created_on" { // oldest created
 		optsListData = optsListData.SetSort(bson.D{{"created_on", 1}})
+	} else if c.QueryParam("order_by") == "created_on_new" { // latest created
+		optsListData = optsListData.SetSort(bson.D{{"created_on", -1}})
 	} else if c.QueryParam("order_by") == "popular" {
 		optsListData = optsListData.SetSort(bson.D{{"visits", -1}})
 	} else {
